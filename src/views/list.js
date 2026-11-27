@@ -1,5 +1,6 @@
 import { TIPOS, TEMAS, NIVELES } from '../data/options.js';
-import { getAll } from '../services/storage.js';
+import { getAll, remove } from '../services/storage.js';
+import { showToast } from '../components/toast.js';
 
 function getLabel(lista, value) {
   const item = lista.find((option) => option.value === value);
@@ -74,6 +75,7 @@ export function renderList(app) {
                     <div class="resource-card__footer">
                       <span class="resource-card__date">${formattedDate}</span>
                       <a href="#/editar/${recurso.id}" class="btn btn-secondary">Editar</a>
+                      <button type="button" class="btn btn-danger" data-id="${recurso.id}">Eliminar</button>
                     </div>
                   </article>
                 `;
@@ -87,4 +89,22 @@ export function renderList(app) {
   };
 
   renderContent();
+
+  const listContainer = container.querySelector('.resources-grid');
+  if (listContainer) {
+    listContainer.addEventListener('click', (event) => {
+      const deleteButton = event.target.closest('.btn-danger[data-id]');
+      if (!deleteButton) return;
+
+      const { id } = deleteButton.dataset;
+      if (!id) return;
+
+      if (window.confirm('¿Estás seguro de que deseas eliminar este recurso?')) {
+        if (remove(id)) {
+          showToast('Recurso eliminado');
+          renderList(app);
+        }
+      }
+    });
+  }
 }
